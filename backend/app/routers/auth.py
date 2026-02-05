@@ -13,52 +13,50 @@ from app.models.enums import AdminRole  # (Unused here but good for context)
 
 router = APIRouter()  # Router instance.
 
-# --- User Auth ---
-
-@router.post("/login/user", response_model=Token)  # User login endpoint. Token return karega validation ke baad.
-def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@router.post("/login", response_model=Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """
-    User login.
-    If credentials are valid but user doesn't exist or password wrong, return specific error.
+    Unified login for both Users and Admins.
+    Logic:
+    1. Try to find user in User table.
+    2. If found, verify password.
+    3. If not found in User table, try to find in Admin table.
+    4. If found in Admin, verify password.
+    5. If neither, raise 400.
     """
-    # Database mein user ko email se dhund rahe hain. OAuth2 spec 'username' field use karta hai, jo humare liye email hai.
+    # 1. Check User table
     user = db.query(User).filter(User.email == form_data.username).first()
-    # If user doesn't exist OR password doesn't match
-    # Check kar rahe hain ki user mila ya nahi, aur password verify kar rahe hain hash compare karke.
-    if not user or not security.verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=400, 
-            detail="You're not our Employee" # Custom error message as requested
-            # Security precaution: Generic "Invalid credentials" dena better hota hai username enumeraton rokne ke liye, par client requirement specific thi.
+    if user and security.verify_password(form_data.password, user.hashed_password):
+        if not user.is_active:
+            raise HTTPException(status_code=400, detail="User account is not active")
+        
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = security.create_access_token(
+            subject=user.email, user_type="user", expires_delta=access_token_expires
         )
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    # 2. Check Admin table (Logic falls through here if User not found OR password wrong)
+    # Note: Technically if User found but password wrong, we shouldn't check Admin, 
+    # but for simplicity/unified creds (email could be same?), we can check both.
+    # However, usually email is unique across system.
+    # If user object existed but password failed, we might stop there.
+    # But let's assume separate pools.
     
-    if not user.is_active:  # Agar user banned hai toh login block kar rahe hain.
-        raise HTTPException(status_code=400, detail="User account is not active")
-
-    # Expiry time calculate kar rahe hain settings se.
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    # JWT token generate kar rahe hain user identity ke saath. 'type="user"' claim add kiya role separation ke liye.
-    access_token = security.create_access_token(
-        subject=user.email, user_type="user", expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}  # Token response return kar rahe hain JSON format mein.
-
-@router.post("/login/admin", response_model=Token)  # Admin specific login route.
-def login_admin(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """Admin login."""
-    # Admin table check kar rahe hain instead of User table.
     admin = db.query(Admin).filter(Admin.email == form_data.username).first()
-    # Authentication check.
-    if not admin or not security.verify_password(form_data.password, admin.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    
-    # Check agar admin active hai (approved by senior admin).
-    if not admin.is_active:
-        raise HTTPException(status_code=400, detail="Admin account pending approval")
+    if admin and security.verify_password(form_data.password, admin.hashed_password):
+        if not admin.is_active:
+             raise HTTPException(status_code=400, detail="Admin account pending approval")
+             
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = security.create_access_token(
+            subject=admin.email, user_type="admin", expires_delta=access_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    # Admin ke liye token generate kar rahe hain 'type="admin"' ke saath.
-    access_token = security.create_access_token(
-        subject=admin.email, user_type="admin", expires_delta=access_token_expires
+    # 3. Failed both
+    raise HTTPException(
+        status_code=400,
+        detail="Incorrect email or password",
+        headers={"WWW-Authenticate": "Bearer"},
     )
-    return {"access_token": access_token, "token_type": "bearer"}

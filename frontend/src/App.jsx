@@ -1,93 +1,52 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
-import Login from './pages/Login';
-import UserDashboard from './pages/UserDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import CreateTicket from './pages/CreateTicket';
-import MyTickets from './pages/MyTickets';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import SubmitTicket from "./pages/SubmitTicket";
+import ViewTickets from "./pages/ViewTickets";
+import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/Settings";
+import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-/*
-  Route Protection Helper.
-  Reason: Agar koi bina login kiye dashboard access kare toh usse rokna hai.
-  Role based protection bhi handle kar sakte hain.
-*/
-const ProtectedRoute = ({ children, allowedRoles }) => {
-  const role = localStorage.getItem('userRole'); // 'admin' or 'user'
+import { ThemeProvider } from "./context/ThemeContext";
 
-  // Agar login nahi hai
-  if (!role) {
-    return <Navigate to="/login" replace />;
-  }
+const queryClient = new QueryClient();
 
-  // Agar role match nahi karta (e.g. User trying to access Admin)
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    // Redirect to their respective dashboard
-    return role === 'admin' ? <Navigate to="/admin-dashboard" /> : <Navigate to="/user-dashboard" />;
-  }
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
 
-  return children;
-};
+              {/* Protected Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/submit-ticket" element={<SubmitTicket />} />
+                <Route path="/view-tickets" element={<ViewTickets />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/settings" element={<Settings />} />
+              </Route>
 
-function App() {
-  return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-
-          {/* 
-               Admin Route 
-               Access: Only 'admin'
-            */}
-          <Route
-            path="/admin-dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* 
-               User Route 
-               Access: Only 'user'
-            */}
-          <Route
-            path="/user-dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['user']}>
-                <UserDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* General Routes (Accessible to both for now, can be restricted further) */}
-          <Route
-            path="/create-ticket"
-            element={
-              <ProtectedRoute allowedRoles={['user', 'admin']}>
-                <CreateTicket />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/tickets"
-            element={
-              <ProtectedRoute allowedRoles={['user', 'admin']}>
-                <MyTickets />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Fallback to Dashboard based on role logic can be complex, simply redirect to login for 404 */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Layout>
-    </Router>
-  );
-}
+              <Route path="/contact" element={<Contact />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  </QueryClientProvider>
+);
 
 export default App;

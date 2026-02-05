@@ -1,98 +1,171 @@
-import React from 'react';
-import GlassCard from '../components/GlassCard';
-import { Ticket, CheckCircle, Clock } from 'lucide-react';
+import { useQuery } from "@tanstack/react-query";
+import { getTickets } from "@/lib/api";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { StatCard } from "@/components/ui/stat-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    FileText,
+    CheckCircle2,
+    Loader2,
+    Clock,
+    ArrowRight,
+    AlertCircle,
+    LogOut
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
-/* 
-  Dashboard Component.
-  Reason: Admin aur User ko key metrics at a glance dikhane ke liye.
-*/
 const Dashboard = () => {
-    /* 
-       Stats Data Mocking.
-       Reason: Backend integration se pehle UI skeleton ready kar rahe hain.
-    */
-    const stats = [
-        {
-            title: 'Total Tickets',
-            value: 24,
-            icon: <Ticket size={24} color="var(--primary)" />,
-            desc: 'All time tickets raised'
-        },
-        {
-            title: 'Pending',
-            value: 12,
-            icon: <Clock size={24} color="#F59E0B" />, // Amber color
-            desc: 'Awaiting action'
-        },
-        {
-            title: 'Resolved',
-            value: 8,
-            icon: <CheckCircle size={24} color="#10B981" />, // Emerald color
-            desc: 'Successfully closed'
-        },
-    ];
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+    const { toast } = useToast();
+
+    const { data: tickets = [], isLoading, error } = useQuery({
+        queryKey: ["tickets"],
+        queryFn: getTickets,
+    });
+
+    const handleLogout = () => {
+        logout();
+        toast({
+            title: "Logged Out",
+            description: "You have been successfully logged out.",
+        });
+        navigate("/login");
+    };
+
+    const totalTickets = tickets.length;
+    const resolvedTickets = tickets.filter(t => t.status === "resolved").length;
+    const processingTickets = tickets.filter(t => t.status === "processing").length;
+    const pendingTickets = tickets.filter(t => t.status === "pending").length;
+
+    const recentTickets = tickets.slice(0, 5);
 
     return (
-        <div className="flex flex-col gap-6">
-            {/* Page Header */}
-            <div>
-                <h2 className="text-3xl font-bold">Dashboard</h2>
-                <p className="text-secondary">Welcome back, Admin.</p>
-            </div>
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-teal-light via-background to-info-light">
+            <Header />
 
-            {/* Stats Grid */}
-            <div className="grid gap-4 md-grid-cols-3">
-                {stats.map((stat, index) => (
-                    /* 
-                       GlassCard use kar rahe hain stat box ke liye.
-                       Delay staggar kar rahe hain (0.1, 0.2, 0.3) smooth entry for har card.
-                    */
-                    <GlassCard key={index} delay={index * 0.1} className="flex flex-col gap-2">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-secondary font-medium">{stat.title}</span>
-                            <div className="p-2 rounded-full bg-white bg-opacity-50">
-                                {stat.icon}
-                            </div>
+            <main className="flex-1 py-12">
+                <div className="container">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+                            <p className="text-muted-foreground mt-1">
+                                Overview of ticket management and performance
+                            </p>
                         </div>
-                        <span className="text-4xl font-bold">{stat.value}</span>
-                        <span className="text-sm text-secondary mt-1">{stat.desc}</span>
-                    </GlassCard>
-                ))}
-            </div>
+                        <Button onClick={handleLogout} variant="destructive" className="gap-2">
+                            <LogOut className="h-4 w-4" />
+                            Logout
+                        </Button>
+                    </div>
 
-            {/* Recent Activity Section */}
-            <GlassCard className="mt-4" delay={0.4}>
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Recent Tickets</h3>
-                    <button className="text-primary font-medium text-sm">View All</button>
-                </div>
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <StatCard
+                            icon={FileText}
+                            value={totalTickets}
+                            label="Total Tickets"
+                            variant="teal"
+                        />
+                        <StatCard
+                            icon={CheckCircle2}
+                            value={resolvedTickets}
+                            label="Resolved"
+                            variant="success"
+                        />
+                        <StatCard
+                            icon={Loader2}
+                            value={processingTickets}
+                            label="Processing"
+                            variant="info"
+                        />
+                        <StatCard
+                            icon={Clock}
+                            value={pendingTickets}
+                            label="Pending"
+                            variant="pending"
+                        />
+                    </div>
 
-                <div className="flex flex-col">
-                    {/* Mock Activity List */}
-                    {[1, 2, 3].map((i) => (
-                        <div
-                            key={i}
-                            className="flex justify-between items-center p-4"
-                            style={{ borderBottom: i < 3 ? '1px solid rgba(0,0,0,0.05)' : 'none' }}
-                        >
-                            <div className="flex items-center gap-4">
-                                {/* Status Indicator Dot */}
-                                <div className={`w-3 h-3 rounded-full ${i === 2 ? 'bg-green-500' : 'bg-yellow-500'}`}
-                                    style={{ backgroundColor: i === 2 ? '#10B981' : '#F59E0B' }}></div>
-
-                                <div>
-                                    <p className="font-bold text-main">Hardware Malfunction #{100 + i}</p>
-                                    <p className="text-sm text-secondary">Reported by User A</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-medium text-main">Today</p>
-                                <p className="text-xs text-secondary">2 hours ago</p>
-                            </div>
+                    {/* Recent Tickets */}
+                    <div className="bg-card rounded-xl shadow-card overflow-hidden">
+                        <div className="flex items-center justify-between p-6 border-b border-border">
+                            <h2 className="text-lg font-semibold text-foreground">Recent Tickets</h2>
+                            <Link
+                                to="/view-tickets"
+                                className="text-sm text-primary hover:underline flex items-center gap-1"
+                            >
+                                View All <ArrowRight className="h-3 w-3" />
+                            </Link>
                         </div>
-                    ))}
+                        {isLoading ? (
+                            <div className="p-8 flex justify-center">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : error ? (
+                            <div className="p-8 flex justify-center text-destructive">
+                                <AlertCircle className="h-6 w-6 mr-2" />
+                                Failed to load tickets
+                            </div>
+                        ) : (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="bg-muted/50">
+                                        <TableHead className="font-semibold">ID</TableHead>
+                                        <TableHead className="font-semibold">Description</TableHead>
+                                        <TableHead className="font-semibold">Status</TableHead>
+                                        <TableHead className="font-semibold">Date</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {recentTickets.map((ticket) => (
+                                        <TableRow key={ticket.id} className="hover:bg-muted/30">
+                                            <TableCell className="font-medium text-primary">
+                                                TKT-{ticket.id}
+                                            </TableCell>
+                                            <TableCell>{ticket.description}</TableCell>
+                                            <TableCell>
+                                                <StatusBadge status={ticket.status} />
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {new Date(ticket.created_at).toLocaleDateString()}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {recentTickets.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                                                No tickets found
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        )}
+                    </div>
                 </div>
-            </GlassCard>
+            </main>
+
+            <Footer />
         </div>
     );
 };
