@@ -39,6 +39,7 @@ class TicketResponse(TicketBase):  # Ticket details return karne ke liye schema.
     assigned_admin_id: Optional[int]  # Assigned admin ID.
     
     attachments: List[AttachmentResponse] = []  # Nested object list attachments ke liye. Ye powerful feature hai Pydantic ka.
+    status_logs: List[TicketStatusLogResponse] = []
 
     class Config:
         from_attributes = True  # ORM serialization enable.

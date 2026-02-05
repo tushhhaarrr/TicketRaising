@@ -36,14 +36,15 @@ import { useState } from "react";
 
 const TicketDetailsModal = ({ ticket, isAdmin, onUpdateStatus }) => {
     return (
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
             <DialogHeader>
                 <DialogTitle>Ticket Details</DialogTitle>
                 <DialogDescription>
                     TKT-{ticket.id} - Created on {new Date(ticket.created_at).toLocaleDateString()}
                 </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-6 py-4">
+                {/* Status Section */}
                 <div className="space-y-2">
                     <h4 className="font-medium leading-none">Status</h4>
                     {isAdmin ? (
@@ -65,12 +66,47 @@ const TicketDetailsModal = ({ ticket, isAdmin, onUpdateStatus }) => {
                         <StatusBadge status={ticket.status} />
                     )}
                 </div>
+
+                {/* Hold Reason - Visible if exists */}
+                {ticket.hold_reason && (
+                    <div className="space-y-2">
+                        <h4 className="font-medium leading-none text-warning">Hold Reason</h4>
+                        <p className="text-sm bg-warning-light/20 p-3 rounded-md border border-warning/20">
+                            {ticket.hold_reason}
+                        </p>
+                    </div>
+                )}
+
+                {/* Description */}
                 <div className="space-y-2">
                     <h4 className="font-medium leading-none">Description / Query</h4>
                     <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md min-h-[100px] whitespace-pre-wrap">
                         {ticket.description}
                     </p>
                 </div>
+
+                {/* Status History Logs */}
+                <div className="space-y-2">
+                    <h4 className="font-medium leading-none">Status History</h4>
+                    <div className="border rounded-md divide-y max-h-[150px] overflow-y-auto">
+                        {ticket.status_logs && ticket.status_logs.length > 0 ? (
+                            ticket.status_logs.map((log) => (
+                                <div key={log.id} className="p-2 text-xs flex justify-between items-center text-muted-foreground">
+                                    <span>
+                                        {log.old_status ? `${log.old_status} → ` : "Created as "}
+                                        <span className="font-medium text-foreground">{log.new_status}</span>
+                                    </span>
+                                    <span className="text-[10px] opacity-70">
+                                        {new Date(log.timestamp).toLocaleString()}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="p-3 text-sm text-muted-foreground text-center">No history available</div>
+                        )}
+                    </div>
+                </div>
+
                 {/* File handling could go here later */}
             </div>
         </DialogContent>

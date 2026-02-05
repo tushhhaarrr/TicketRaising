@@ -2,6 +2,11 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 const statusStyles = {
+    "Pending": "bg-pending-light text-pending",
+    "In Progress": "bg-info-light text-info",
+    "Resolved": "bg-success-light text-success",
+    "On Hold": "bg-warning-light text-warning",
+    // Keep lowercase for fallback/legacy if needed
     pending: "bg-pending-light text-pending",
     processing: "bg-info-light text-info",
     resolved: "bg-success-light text-success",
@@ -9,6 +14,11 @@ const statusStyles = {
 };
 
 const statusLabels = {
+    "Pending": "Pending",
+    "In Progress": "In Progress",
+    "Resolved": "Resolved",
+    "On Hold": "On Hold",
+    // Keep lowercase for fallback
     pending: "Pending",
     processing: "Processing",
     resolved: "Resolved",

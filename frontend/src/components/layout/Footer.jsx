@@ -1,6 +1,8 @@
 import React from "react";
 import { Droplets, Twitter, Linkedin, Facebook, Instagram } from "lucide-react";
 
+import logo from "@/assets/logo.png";
+
 /**
  * Footer component.
  */
@@ -10,9 +12,7 @@ const Footer = () => {
             <div className="container">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-light">
-                            <Droplets className="h-5 w-5 text-primary" />
-                        </div>
+                        <img src={logo} alt="Quick Smart Wash" className="h-10 w-10 rounded-full object-cover" />
                         <span className="text-lg font-bold text-primary">Quick Smart Wash</span>
                     </div>
 
