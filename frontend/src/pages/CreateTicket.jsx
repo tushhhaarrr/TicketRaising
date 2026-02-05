@@ -36,9 +36,9 @@ const CreateTicket = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <GlassCard>
-                <h2 className="text-2xl font-bold mb-6 text-primary">Describe your issue</h2>
+        <div className="max-w-2xl mx-auto min-h-[70vh] flex items-center justify-center w-full">
+            <GlassCard className="w-full">
+                <h2 className="text-2xl font-bold mb-6 text-primary text-center">Describe your issue</h2>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 

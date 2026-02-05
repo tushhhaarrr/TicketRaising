@@ -59,7 +59,7 @@ const Navbar = () => {
     return (
         /* 
            Navbar Styling Updates:
-           - Fixed positioning fix kiya (user ne 'margin' likh diya tha).
+           - Fixed positioning fix kiya.
            - 'top-4' thoda upar shift kiya.
            - Width adjust ki.
         */
@@ -69,7 +69,7 @@ const Navbar = () => {
            2. Floating Dark Mode Toggle (Bottom Right)
         */
         <>
-            <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 w-[85%] max-w-6xl z-50 glass rounded-2xl px-6 py-2 flex justify-between items-center transition-all duration-300 shadow-2xl">
+            <nav className="Margin top-4 left-1/2 transform -translate-x-1/2 w-[40%] max-w-6xl z-50 glass rounded-2xl px-6 py-2 flex justify-between items-center transition-all duration-300 shadow-2xl">
 
                 {/* Logo Section */}
                 <div className="flex items-center gap-4">

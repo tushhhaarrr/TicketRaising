@@ -411,8 +411,8 @@ button {
 }
 
 .page-wrapper {
-  padding-top: 120px;
-  /* Navbar height compensation */
+  padding-top: 160px;
+  /* Navbar height compensation - Increased to prevent underlap */
   min-height: 100vh;
 }
 
