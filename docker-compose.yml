@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Database Service
+  db:
+    image: postgres:15-alpine
+    container_name: ticket_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ticketRaising
+    ports:
+      - "5432:5432"
+    restart: always
+
+  # Backend Service
+  backend:
+    build: ./backend
+    container_name: ticket_backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Connect to the db service (host: db)
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ticketRaising
+      - SECRET_KEY=CHANGE_THIS_TO_A_SECURE_RANDOM_STRING
+      - FIRST_SUPERUSER=admin@example.com
+      - FIRST_SUPERUSER_PASSWORD=admin123
+    depends_on:
+      - db
+    volumes:
+      # Mount the code for live reloading
+      - ./backend:/app
+    restart: always
+
+  # Frontend Service
+  frontend:
+    build: ./frontend
+    container_name: ticket_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      # Vite creates a watcher; polling is needed in some Docker environments (e.g., Windows)
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      # Mount the code for live reloading
+      - ./frontend:/app
+      # Keep node_modules from the container, preventing local host overrides if folder exists
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

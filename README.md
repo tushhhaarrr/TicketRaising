@@ -117,6 +117,26 @@ npm run dev
 ```
 *The App will be available at `http://localhost:5173`*
 
+### 3️⃣ Docker Setup (Recommended)
+You can run the entire application (Backend + Frontend + Database) using Docker.
+
+**Prerequisites:**
+- Docker Desktop installed and running.
+
+**Steps:**
+1. Open a terminal in the root directory (where `docker-compose.yml` is located).
+2. Run the following command:
+   ```bash
+   docker-compose up --build
+   ```
+3. Access the application:
+   - **Frontend**: http://localhost:5173
+   - **Backend API**: http://localhost:8000/docs
+   - **Database**: Port 5432 (User: `postgres`, Password: `postgres`, DB: `ticketRaising`)
+
+To stop the application, press `Ctrl+C` in the terminal or run `docker-compose down`.
+
+
 ---
 
 ## 📂 Project Structure
