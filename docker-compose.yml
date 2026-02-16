@@ -10,7 +10,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=ticketRaising
     ports:
-      - "5432:5432"
+      - "5433:5432"
     restart: always
 
   # Backend Service
@@ -25,6 +25,7 @@ services:
       - SECRET_KEY=CHANGE_THIS_TO_A_SECURE_RANDOM_STRING
       - FIRST_SUPERUSER=admin@example.com
       - FIRST_SUPERUSER_PASSWORD=admin123
+      - GEMINI_API_KEY=AIzaSyBPWNUEipyCKjJ-O7u1VrOQcm0jRf1AwU4
     depends_on:
       - db
     volumes:

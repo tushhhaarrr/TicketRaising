@@ -19,11 +19,12 @@ import { useAuth } from "@/context/AuthContext";
 
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
+import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 
 const Header = () => {
     const location = useLocation();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const isAdmin = user?.isAdmin;
 
     const filteredNavItems = navItems.filter(item => {
@@ -56,6 +57,16 @@ const Header = () => {
                             </Link>
                         );
                     })}
+                    {user && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={logout}
+                            className="ml-2 text-muted-foreground hover:text-destructive"
+                        >
+                            Logout
+                        </Button>
+                    )}
                 </nav>
             </div>
         </header>

@@ -2,15 +2,18 @@ from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey, Text
 from sqlalchemy.orm import relationship  # Models ke beech interactions define karne ke liye.
 from sqlalchemy.sql import func  # Database side methods jaise `now()` ke liye.
 from app.db.session import Base  # Abstract base class.
-from app.models.enums import TicketStatus  # Ticket statuses consistency ke liye enum use kar rahe hain.
+from app.models.enums import TicketStatus, TicketPriority, TicketCategory  # Ticket statuses consistency ke liye enum use kar rahe hain.
 
 class Ticket(Base):  # Ticket model. Ye humare system ka core data structure hai.
     __tablename__ = "tickets"  # Table naam.
 
     id = Column(Integer, primary_key=True, index=True)  # Unique ID ticket ke liye.
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # User ID foreign key hai. Ticket hamesha kisi user se linked hona chahiye.
+    title = Column(String(200), nullable=False)  # Title needed
     description = Column(Text, nullable=False)  # Issue details. Text type use kiya taaki lambi description store kar sakein.
-    status = Column(Enum(TicketStatus), default=TicketStatus.PENDING, index=True)  # Status track karne ke liye. Default 'Pending'. Indexing fast filtering ke liye.
+    category = Column(Enum(TicketCategory), nullable=False)
+    priority = Column(Enum(TicketPriority), nullable=False)
+    status = Column(Enum(TicketStatus), default=TicketStatus.OPEN, index=True)  # Status track karne ke liye. Default 'Open'. Indexing fast filtering ke liye.
     created_at = Column(DateTime(timezone=True), server_default=func.now())  # Ticket kab create hua.
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())  # Last update time. `onupdate` automatically handle karega jab bhi record change ho.
     

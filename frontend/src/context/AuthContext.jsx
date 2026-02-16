@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from "react";
-import { loginUser, loginAdmin } from "@/lib/api";
+import { loginUser } from "@/lib/api";
 
 const AuthContext = createContext(null);
 

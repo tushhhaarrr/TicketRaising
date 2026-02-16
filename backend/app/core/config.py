@@ -22,6 +22,9 @@ class Settings(BaseSettings):  # Settings values ko define karne ke liye Pydanti
     # Default superuser credentials. Startup script isko use karke admin create karegi agar wo exist nahi karta.
     FIRST_SUPERUSER: str = "admin@example.com"
     FIRST_SUPERUSER_PASSWORD: str = "admin123"
+    
+    # AI Integration
+    GEMINI_API_KEY: Optional[str] = None
 
     class Config:  # Pydantic config settings.
         env_file = ".env"  # Batata hai ki variables kahan se load karne hain. Default `.env` file hai.

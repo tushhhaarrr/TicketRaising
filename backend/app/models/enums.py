@@ -8,8 +8,20 @@ class AdminRole(str, enum.Enum):  # Admin ke alag-alag levels ke liye enum. `str
     SUB = "sub_admin"  # Mid-level admin.
     JUNIOR = "junior_admin"  # Low-level admin jiske paas limited rights honge.
 
-class TicketStatus(str, enum.Enum):  # Ticket ke lifecycle stages define karne ke liye enum.
-    PENDING = "Pending"  # Jab ticket naya create hota hai aur kisi ne pick nahi kiya.
-    IN_PROGRESS = "In Progress"  # Jab admin iss par kaam karna shuru kar deta hai.
-    ON_HOLD = "On Hold"  # Agar ticket temporary pause kiya gaya hai (e.g. user response ka wait).
-    RESOLVED = "Resolved"  # Jab issue fix ho gaya aur ticket close karne ke liye ready hai.
+class TicketCategory(str, enum.Enum):
+    BILLING = "billing"
+    TECHNICAL = "technical"
+    ACCOUNT = "account"
+    GENERAL = "general"
+
+class TicketPriority(str, enum.Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class TicketStatus(str, enum.Enum):
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    CLOSED = "closed"

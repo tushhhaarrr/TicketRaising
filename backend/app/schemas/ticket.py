@@ -1,7 +1,7 @@
 from pydantic import BaseModel  # Pydantic base model import kar rahe validation ke liye.
 from typing import Optional, List  # Type hints import. List use hoga multiple attachments dikhane ke liye.
 from datetime import datetime  # Date time handling ke liye.
-from app.models.enums import TicketStatus  # Enum import validation ke liye taaki status valid hi ho.
+from app.models.enums import TicketStatus, TicketCategory, TicketPriority
 
 # --- Attachment Schemas ---
 # File attachment data ko standardize karne ke liye schema.
@@ -16,7 +16,10 @@ class AttachmentResponse(BaseModel):  # File details return karne ke liye schema
 
 # --- Ticket Schemas ---
 class TicketBase(BaseModel):  # Common fields ke liye base class.
+    title: str
     description: str  # Description mandatory hai.
+    category: TicketCategory
+    priority: TicketPriority
 
 class TicketCreate(TicketBase):  # Ticket create karte time use hoga.
     pass
@@ -26,6 +29,8 @@ class TicketCreate(TicketBase):  # Ticket create karte time use hoga.
 class TicketUpdate(BaseModel):  # Ticket update karne ke liye schema. Saare fields optional hain.
     # For admins to update status/hold reason
     status: Optional[TicketStatus] = None  # Status change karne ke liye.
+    category: Optional[TicketCategory] = None
+    priority: Optional[TicketPriority] = None
     hold_reason: Optional[str] = None  # Agar status hold hai toh reason.
     # For assigning (Senior Admin)
     assigned_admin_id: Optional[int] = None  # Ticket re-assign karne ke liye.

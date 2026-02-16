@@ -1,11 +1,10 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getTickets, updateTicket } from "@/lib/api";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
     Select,
@@ -28,100 +27,34 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
-import { Search, Filter, Plus, Loader2, Eye } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Search, Loader2, Eye } from "lucide-react";
+
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
-const TicketDetailsModal = ({ ticket, isAdmin, onUpdateStatus }) => {
-    return (
-        <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-                <DialogTitle>Ticket Details</DialogTitle>
-                <DialogDescription>
-                    TKT-{ticket.id} - Created on {new Date(ticket.created_at).toLocaleDateString()}
-                </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-6 py-4">
-                {/* Status Section */}
-                <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Status</h4>
-                    {isAdmin ? (
-                        <Select
-                            defaultValue={ticket.status}
-                            onValueChange={(value) => onUpdateStatus(ticket.id, value)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Pending">Pending</SelectItem>
-                                <SelectItem value="In Progress">In Process</SelectItem>
-                                <SelectItem value="On Hold">On Hold</SelectItem>
-                                <SelectItem value="Resolved">Resolved</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    ) : (
-                        <StatusBadge status={ticket.status} />
-                    )}
-                </div>
-
-                {/* Hold Reason - Visible if exists */}
-                {ticket.hold_reason && (
-                    <div className="space-y-2">
-                        <h4 className="font-medium leading-none text-warning">Hold Reason</h4>
-                        <p className="text-sm bg-warning-light/20 p-3 rounded-md border border-warning/20">
-                            {ticket.hold_reason}
-                        </p>
-                    </div>
-                )}
-
-                {/* Description */}
-                <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Description / Query</h4>
-                    <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md min-h-[100px] whitespace-pre-wrap">
-                        {ticket.description}
-                    </p>
-                </div>
-
-                {/* Status History Logs */}
-                <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Status History</h4>
-                    <div className="border rounded-md divide-y max-h-[150px] overflow-y-auto">
-                        {ticket.status_logs && ticket.status_logs.length > 0 ? (
-                            ticket.status_logs.map((log) => (
-                                <div key={log.id} className="p-2 text-xs flex justify-between items-center text-muted-foreground">
-                                    <span>
-                                        {log.old_status ? `${log.old_status} → ` : "Created as "}
-                                        <span className="font-medium text-foreground">{log.new_status}</span>
-                                    </span>
-                                    <span className="text-[10px] opacity-70">
-                                        {new Date(log.timestamp).toLocaleString()}
-                                    </span>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="p-3 text-sm text-muted-foreground text-center">No history available</div>
-                        )}
-                    </div>
-                </div>
-
-                {/* File handling could go here later */}
-            </div>
-        </DialogContent>
-    );
-};
+import { useAuth } from "@/context/AuthContext";
 
 const ViewTickets = () => {
-    const { user } = useAuth();
-    const isAdmin = user?.isAdmin;
     const { toast } = useToast();
+    const { user } = useAuth(); // Get user to check role
     const queryClient = useQueryClient();
+    const [selectedTicket, setSelectedTicket] = useState(null);
 
-    const { data: tickets, isLoading, error } = useQuery({
-        queryKey: ["tickets"],
-        queryFn: getTickets,
+    // Filter State
+    const [filters, setFilters] = useState({
+        search: "",
+        category: "all",
+        priority: "all",
+        status: "all"
+    });
+
+    // Debounce search? For simplicity, using controlled input that triggers refetch on change/blur or just let React Query handle it if fast enough. 
+    // Ideally debounce. But I'll just pass filters directly.
+
+    const { data: tickets = [], isLoading, error } = useQuery({
+        queryKey: ["tickets", filters],
+        queryFn: () => getTickets(filters),
     });
 
     const updateStatusMutation = useMutation({
@@ -136,41 +69,35 @@ const ViewTickets = () => {
         onError: (error) => {
             toast({
                 title: "Update Failed",
-                description: error.response?.data?.detail || "Failed to update status",
+                description: "Failed to update status",
                 variant: "destructive",
             });
         },
     });
 
-    const handleUpdateStatus = (ticketId, status) => {
-        updateStatusMutation.mutate({ ticketId, status });
+    const handleFilterChange = (key, value) => {
+        setFilters(prev => ({ ...prev, [key]: value }));
     };
 
-    const [selectedTicket, setSelectedTicket] = useState(null);
+    const getStatusColor = (status) => {
+        switch (status) {
+            case "open": return "bg-blue-100 text-blue-800";
+            case "in_progress": return "bg-yellow-100 text-yellow-800";
+            case "resolved": return "bg-green-100 text-green-800";
+            case "closed": return "bg-gray-100 text-gray-800";
+            default: return "bg-gray-100 text-gray-800";
+        }
+    };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex flex-col bg-background">
-                <Header />
-                <main className="flex-1 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </main>
-                <Footer />
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen flex flex-col bg-background">
-                <Header />
-                <main className="flex-1 flex items-center justify-center">
-                    <p className="text-destructive">Failed to load tickets. Please try again later.</p>
-                </main>
-                <Footer />
-            </div>
-        );
-    }
+    const getPriorityColor = (priority) => {
+        switch (priority) {
+            case "critical": return "text-red-600 font-bold";
+            case "high": return "text-orange-500 font-medium";
+            case "medium": return "text-yellow-600";
+            case "low": return "text-green-600";
+            default: return "";
+        }
+    };
 
     return (
         <div className="min-h-screen flex flex-col bg-background">
@@ -178,114 +105,189 @@ const ViewTickets = () => {
 
             <main className="flex-1 py-12">
                 <div className="container">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                        <div>
-                            <h1 className="text-3xl font-bold text-foreground">View Tickets</h1>
-                            <p className="text-muted-foreground mt-1">
-                                Manage and track all your support tickets
-                            </p>
-                        </div>
-                        {!isAdmin && (
-                            <Button asChild className="shadow-button">
-                                <Link to="/submit-ticket">
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    New Ticket
-                                </Link>
-                            </Button>
-                        )}
+                    <div className="flex justify-between items-center mb-6">
+                        <h1 className="text-3xl font-bold">Ticket List</h1>
+                        <Button asChild>
+                            <Link to="/submit-ticket">New Ticket</Link>
+                        </Button>
                     </div>
 
                     {/* Filters */}
-                    <div className="bg-card rounded-xl p-4 shadow-card mb-6">
-                        <div className="flex flex-col md:flex-row gap-4">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input placeholder="Search tickets..." className="pl-10" />
-                            </div>
-                            <Select>
-                                <SelectTrigger className="w-full md:w-[180px]">
-                                    <SelectValue placeholder="All Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="processing">Processing</SelectItem>
-                                    <SelectItem value="resolved">Resolved</SelectItem>
-                                    <SelectItem value="on-hold">On Hold</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button variant="outline" size="icon">
-                                <Filter className="h-4 w-4" />
-                            </Button>
+                    <div className="bg-card rounded-xl p-4 shadow-sm mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search..."
+                                className="pl-10"
+                                value={filters.search}
+                                onChange={(e) => handleFilterChange("search", e.target.value)}
+                            />
                         </div>
+
+                        <Select value={filters.category} onValueChange={(val) => handleFilterChange("category", val)}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Categories</SelectItem>
+                                <SelectItem value="billing">Billing</SelectItem>
+                                <SelectItem value="technical">Technical</SelectItem>
+                                <SelectItem value="account">Account</SelectItem>
+                                <SelectItem value="general">General</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={filters.priority} onValueChange={(val) => handleFilterChange("priority", val)}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Priority" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Priorities</SelectItem>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="critical">Critical</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={filters.status} onValueChange={(val) => handleFilterChange("status", val)}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="open">Open</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="resolved">Resolved</SelectItem>
+                                <SelectItem value="closed">Closed</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
-                    {/* Tickets Table */}
-                    <div className="bg-card rounded-xl shadow-card overflow-hidden">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="bg-muted/50">
-                                    <TableHead className="font-semibold">ID</TableHead>
-                                    <TableHead className="font-semibold">Description</TableHead>
-                                    <TableHead className="font-semibold">Status</TableHead>
-                                    <TableHead className="font-semibold">Date</TableHead>
-                                    <TableHead className="font-semibold text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {tickets.map((ticket) => (
-                                    <TableRow key={ticket.id} className="hover:bg-muted/30">
-                                        <TableCell className="font-medium text-primary">
-                                            TKT-{ticket.id}
-                                        </TableCell>
-                                        <TableCell className="max-w-md truncate">
-                                            {ticket.description}
-                                        </TableCell>
-                                        <TableCell>
-                                            {isAdmin ? (
-                                                <Select
-                                                    defaultValue={ticket.status}
-                                                    onValueChange={(value) => handleUpdateStatus(ticket.id, value)}
-                                                >
-                                                    <SelectTrigger className="w-[140px] h-8">
-                                                        <SelectValue placeholder="Status" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="Pending">Pending</SelectItem>
-                                                        <SelectItem value="In Progress">In Process</SelectItem>
-                                                        <SelectItem value="On Hold">On Hold</SelectItem>
-                                                        <SelectItem value="Resolved">Resolved</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            ) : (
-                                                <StatusBadge status={ticket.status} />
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                            {new Date(ticket.created_at).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => setSelectedTicket(ticket)}>
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <TicketDetailsModal
-                                                    ticket={ticket}
-                                                    isAdmin={isAdmin}
-                                                    onUpdateStatus={handleUpdateStatus}
-                                                />
-                                            </Dialog>
-                                        </TableCell>
+                    {/* Table */}
+                    <div className="bg-card rounded-xl shadow overflow-hidden">
+                        {isLoading ? (
+                            <div className="p-8 flex justify-center">
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                            </div>
+                        ) : error ? (
+                            <div className="p-8 text-center text-destructive">Error loading tickets</div>
+                        ) : (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Title</TableHead>
+                                        <TableHead>Category</TableHead>
+                                        <TableHead>Priority</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Created At</TableHead>
+                                        <TableHead>Actions</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {tickets.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="text-center py-6">
+                                                No tickets found.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        tickets.map((ticket) => (
+                                            <TableRow key={ticket.id}>
+                                                <TableCell className="font-medium">
+                                                    <div>{ticket.title}</div>
+                                                    <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                                        {ticket.description}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="capitalize">{ticket.category}</TableCell>
+                                                <TableCell className={`capitalize ${getPriorityColor(ticket.priority)}`}>
+                                                    {ticket.priority}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(ticket.status)}`}>
+                                                        {ticket.status.replace('_', ' ')}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground text-sm">
+                                                    {new Date(ticket.created_at).toLocaleDateString()}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => setSelectedTicket(ticket)}
+                                                            className="h-8 w-8"
+                                                        >
+                                                            <Eye className="h-4 w-4" />
+                                                        </Button>
+                                                        {user?.isAdmin && (
+                                                            <Select
+                                                                defaultValue={ticket.status}
+                                                                onValueChange={(val) => updateStatusMutation.mutate({ ticketId: ticket.id, status: val })}
+                                                            >
+                                                                <SelectTrigger className="h-8 w-[130px]">
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="open">Open</SelectItem>
+                                                                    <SelectItem value="in_progress">In Progress</SelectItem>
+                                                                    <SelectItem value="resolved">Resolved</SelectItem>
+                                                                    <SelectItem value="closed">Closed</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        )}
                     </div>
                 </div>
             </main>
-
+            {selectedTicket && (
+                <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
+                    <DialogContent className="max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Ticket History</DialogTitle>
+                            <DialogDescription>
+                                Actions performed on ticket #{selectedTicket.id}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                            {selectedTicket.status_logs && selectedTicket.status_logs.length > 0 ? (
+                                <div className="border rounded-md divide-y">
+                                    {selectedTicket.status_logs.map((log) => (
+                                        <div key={log.id} className="p-3 text-sm flex flex-col gap-1">
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-medium capitalize">
+                                                    {log.old_status?.replace('_', ' ') || 'Created'} &rarr; {log.new_status.replace('_', ' ')}
+                                                </span>
+                                                <span className="text-muted-foreground text-xs">
+                                                    {new Date(log.timestamp).toLocaleString()}
+                                                </span>
+                                            </div>
+                                            {log.changed_by_admin_id && (
+                                                <div className="text-xs text-muted-foreground">
+                                                    Action by Admin
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center text-muted-foreground py-8">
+                                    No status changes recorded.
+                                </div>
+                            )}
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
             <Footer />
         </div>
     );

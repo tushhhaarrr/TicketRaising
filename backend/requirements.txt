@@ -3,6 +3,11 @@ uvicorn
 sqlalchemy
 alembic
 psycopg2-binary
+fastapi
+uvicorn
+sqlalchemy
+alembic
+psycopg2-binary
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
@@ -10,3 +15,4 @@ pydantic
 pydantic-settings
 email-validator
 python-dotenv
+google-generativeai

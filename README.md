@@ -66,69 +66,40 @@ The system follows a decoupled **Client-Server Architecture**:
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Assignment Submission)
 
-Follow these instructions to set up the project locally.
+### 1️⃣ Setup Instructions
+1.  **Clone/Unzip** the project.
+2.  **Environment Variables**:
+    - Pass your OpenAI API Key in `docker-compose.yml` (environment: `OPENAI_API_KEY`) or create a `.env` file if configured.
+    - Default is set to `${OPENAI_API_KEY}`.
+3.  **Run with Docker**:
+    - **Important**: If you have run this project before, please reset the database volume to apply new schema changes:
+      ```bash
+      docker-compose down -v
+      ```
+    - Start the application:
+      ```bash
+      docker-compose up --build
+      ```
+4.  **Access**:
+    - **Frontend**: http://localhost:5173
+    - **Backend API**: http://localhost:8000/docs
+    - **Credentials** (Pre-created):
+        - Admin: `admin@example.com` / `admin123`
+        - User: `user@example.com` / `user123`
 
-### Prerequisites
-- Node.js (v16+)
-- Python (v3.9+)
-- PostgreSQL (Optional, defaults to SQLite)
+### 🤖 LLM Integration
+- **LLM Chosen**: **Google Gemini (gemini-1.5-flash)**.
+- **Reason**: It is a highly capable and cost-effective (free tier available) model that excels at classification tasks.
+- **Failover**: The system includes graceful error handling. If the API key is missing or the API call fails, it defaults to `General` / `Medium` without blocking the user.
+- **Prompt**: Located in `backend/app/services/llm_service.py`. It uses a rigid system prompt to enforce JSON output.
 
-### 1️⃣ Backend Setup
-
-```bash
-# Navigate to backend directory
-cd backend
-
-# Create virtual environment
-python -m venv venv
-# Windows:
-.\venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the server
-uvicorn app.main:app --reload
-```
-*The API will be available at `http://localhost:8000`*
-
-### 2️⃣ Frontend Setup
-
-```bash
-# Navigate to frontend directory
-cd frontend
-
-# Install dependencies
-npm install
-
-# Run the live server
-npm run dev
-```
-*The App will be available at `http://localhost:5173`*
-
-### 3️⃣ Docker Setup (Recommended)
-You can run the entire application (Backend + Frontend + Database) using Docker.
-
-**Prerequisites:**
-- Docker Desktop installed and running.
-
-**Steps:**
-1. Open a terminal in the root directory (where `docker-compose.yml` is located).
-2. Run the following command:
-   ```bash
-   docker-compose up --build
-   ```
-3. Access the application:
-   - **Frontend**: http://localhost:5173
-   - **Backend API**: http://localhost:8000/docs
-   - **Database**: Port 5432 (User: `postgres`, Password: `postgres`, DB: `ticketRaising`)
-
-To stop the application, press `Ctrl+C` in the terminal or run `docker-compose down`.
-
+### 📐 Design Decisions
+- **Backend**: Struck to **FastAPI** as requested, simulating the Django requirements using Pydantic schemas and SQLAlchemy models.
+- **Database**: Used **PostgreSQL** in Docker. Implemented DB-level aggregation for stats using SQLAlchemy queries.
+- **Frontend**: **React** with **TanStack Query (React Query)** for efficient data fetching and caching. Used **Tailwind CSS** components for a clean UI.
+- **Separation of Concerns**: Logic for LLM is isolated in a service layer. API call logic is centralized in `frontend/src/lib/api.js`.
 
 ---
 

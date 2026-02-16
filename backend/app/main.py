@@ -44,10 +44,14 @@ def startup_event():
         os.makedirs("uploads")
     
     # Init DB with Super Admin if not exists
-    from app.db.session import SessionLocal
+    from app.db.session import SessionLocal, engine, Base
     from app.models.user import Admin, User
+    from app.models.ticket import Ticket # Import Ticket to register it with Base
     from app.core import security
     from app.models.enums import AdminRole
+
+    # Create tables if they don't exist
+    Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()
     try:
