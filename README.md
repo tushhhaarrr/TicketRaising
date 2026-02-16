@@ -29,10 +29,13 @@ The **Ticket Raising Platform** is a state-of-the-art enterprise solution design
 The system follows a decoupled **Client-Server Architecture**:
 
 ```text
-+----------------+       +------------------+       +-------------------+       +---------------------+
-|   User/Admin   | ----> |  React Frontend  | ----> |  FastAPI Backend  | ----> |    PostgreSQL DB    |
-|   (Browser)    |       |     (Vite)       |       |     (Python)      |       |     (SQLAlchemy)    |
-+----------------+       +------------------+       +-------------------+       +---------------------+
+    ┌──────────────┐          ┌───────────────────┐          ┌───────────────────┐          ┌───────────────────┐
+    │  User/Admin  │          │   React Frontend  │          │  FastAPI Backend  │          │   PostgreSQL DB   │
+    │  (Browser)   │ ───────► │       (Vite)      │ ───────► │      (Python)     │ ───────► │    (SQLAlchemy)   │
+    └──────────────┘          └───────────────────┘          └───────────────────┘          └───────────────────┘
+           ▲                            │                              │                              │
+           └────────────────────────────┴──────────────────────────────┴──────────────────────────────┘
+                                     HTTP / JSON Response Flow
 ```
 
 ### 💻 Technology Stack
