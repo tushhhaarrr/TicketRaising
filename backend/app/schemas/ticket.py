@@ -30,6 +30,17 @@ class TicketUpdate(BaseModel):  # Ticket update karne ke liye schema. Saare fiel
     # For assigning (Senior Admin)
     assigned_admin_id: Optional[int] = None  # Ticket re-assign karne ke liye.
 
+
+class TicketStatusLogResponse(BaseModel):  # Logs dikhane ke liye schema.
+    id: int
+    old_status: Optional[TicketStatus]  # Purana status.
+    new_status: TicketStatus  # Naya status.
+    timestamp: datetime  # Kab change hua.
+    changed_by_admin_id: Optional[int]  # Kis admin ne change kiya.
+
+    class Config:
+        from_attributes = True  # ORM serialization enable.
+
 class TicketResponse(TicketBase):  # Ticket details return karne ke liye schema.
     id: int  # Ticket ID.
     user_id: int  # User jisne banaya.
@@ -44,12 +55,3 @@ class TicketResponse(TicketBase):  # Ticket details return karne ke liye schema.
     class Config:
         from_attributes = True  # ORM serialization enable.
 
-class TicketStatusLogResponse(BaseModel):  # Logs dikhane ke liye schema.
-    id: int
-    old_status: Optional[TicketStatus]  # Purana status.
-    new_status: TicketStatus  # Naya status.
-    timestamp: datetime  # Kab change hua.
-    changed_by_admin_id: Optional[int]  # Kis admin ne change kiya.
-
-    class Config:
-        from_attributes = True  # ORM serialization enable.
