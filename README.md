@@ -1,11 +1,8 @@
 # Todoist - Ticket Raising Platform 🚀
 
-![Banner](https://via.placeholder.com/1200x400.png?text=Quick+Smart+Wash+Enterprise+Platform)
-*(Place your banner image at `docs/images/banner.png`)*
-
 ## 📖 Overview
 
-The ** Ticket Raising Platform** is a state-of-the-art enterprise solution designed to streamline internal issue tracking and resolution. built with a **FastAPI** backend and a **Modern React** frontend, this application features a premium **Glassmorphism UI** inspired by MacOS aesthetics. It bridges the gap between employees and support staff through an intuitive, reliable, and aesthetically pleasing interface.
+The **Ticket Raising Platform** is a state-of-the-art enterprise solution designed to streamline internal issue tracking and resolution. Built with a **FastAPI** backend and a **Modern React** frontend, this application features a premium **Glassmorphism UI** inspired by MacOS aesthetics. It bridges the gap between employees and support staff through an intuitive, reliable, and aesthetically pleasing interface.
 
 ## ✨ Key Features
 
@@ -15,7 +12,7 @@ The ** Ticket Raising Platform** is a state-of-the-art enterprise solution desig
 - **Responsive Layout**: A mobile-first design that adapts perfectly from desktops to smartphones.
 
 ### 🛠️ Functional Modules
-- **🔐 Role-Based Access Control (RBAC)**: secure login for **Admins** and **Employees** with distinct dashboards.
+- **🔐 Role-Based Access Control (RBAC)**: Secure login for **Admins** and **Employees** with distinct dashboards.
 - **📊 Admin Dashboard**:
   - Real-time statistics (Total Tickets, Solved, Pending).
   - Interactive monthly performance graphs (Area Charts).
@@ -31,16 +28,11 @@ The ** Ticket Raising Platform** is a state-of-the-art enterprise solution desig
 
 The system follows a decoupled **Client-Server Architecture**:
 
-```mermaid
-graph TD
-    User((User/Admin))
-    FE[React Frontend]
-    BE[FastAPI Backend]
-    DB[(PostgreSQL DB)]
-
-    User -->|Interacts via Browser| FE
-    FE -->|REST API Calls (JSON)| BE
-    BE -->|SQLAlchemy ORM| DB
+```text
++----------------+       +------------------+       +-------------------+       +---------------------+
+|   User/Admin   | ----> |  React Frontend  | ----> |  FastAPI Backend  | ----> |    PostgreSQL DB    |
+|   (Browser)    |       |     (Vite)       |       |     (Python)      |       |     (SQLAlchemy)    |
++----------------+       +------------------+       +-------------------+       +---------------------+
 ```
 
 ### 💻 Technology Stack
@@ -56,8 +48,6 @@ graph TD
 ---
 
 ## 📸 Screenshots
-
-> **Note**: These are placeholder locations. Please capture screenshots of your running app and place them in `docs/images/`.
 
 ### 1. Login Page
 *A sleek, glass-styled entry point for all users.*
@@ -148,7 +138,7 @@ TicketRaising/
 │   │   ├── routers/        # API Endpoints (Auth, Tickets, Users)
 │   │   ├── models/         # Database Models
 │   │   └── schemas/        # Pydantic Schemas
-│   └── main.py             # Entry Point
+│   │   └── main.py         # Entry Point
 │
 ├── frontend/               # React Application
 │   ├── src/
