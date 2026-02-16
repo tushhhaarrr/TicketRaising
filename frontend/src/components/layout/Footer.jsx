@@ -12,8 +12,8 @@ const Footer = () => {
             <div className="container">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <img src={logo} alt="Quick Smart Wash" className="h-10 w-10 rounded-full object-cover" />
-                        <span className="text-lg font-bold text-primary">Quick Smart Wash</span>
+                        <img src={logo} alt="Todoist" className="h-10 w-10 rounded-full object-cover" />
+                        <span className="text-lg font-bold text-primary">Todoist</span>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -33,7 +33,7 @@ const Footer = () => {
                 </div>
 
                 <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-                    © 2024 Quick Smart Wash. All rights reserved.
+                    © 2026Todoist. All rights reserved.
                 </div>
             </div>
         </footer>

@@ -1,11 +1,11 @@
-# Quick Smart Wash - Ticket Raising Platform 🚀
+# Todoist - Ticket Raising Platform 🚀
 
 ![Banner](https://via.placeholder.com/1200x400.png?text=Quick+Smart+Wash+Enterprise+Platform)
 *(Place your banner image at `docs/images/banner.png`)*
 
 ## 📖 Overview
 
-The **Quick Smart Wash Ticket Raising Platform** is a state-of-the-art enterprise solution designed to streamline internal issue tracking and resolution. built with a **FastAPI** backend and a **Modern React** frontend, this application features a premium **Glassmorphism UI** inspired by MacOS aesthetics. It bridges the gap between employees and support staff through an intuitive, reliable, and aesthetically pleasing interface.
+The ** Ticket Raising Platform** is a state-of-the-art enterprise solution designed to streamline internal issue tracking and resolution. built with a **FastAPI** backend and a **Modern React** frontend, this application features a premium **Glassmorphism UI** inspired by MacOS aesthetics. It bridges the gap between employees and support staff through an intuitive, reliable, and aesthetically pleasing interface.
 
 ## ✨ Key Features
 
@@ -162,8 +162,8 @@ TicketRaising/
 ```
 
 ## 🤝 Contributing
-Contributions are welcome! Please reach out to the development team at **Quick Smart Wash Pvt Ltd.** for access.
+Contributions are welcome! Please reach out to the development team at **Todoist Pvt Ltd.** for access.
 
 ---
 
-© 2024 Quick Smart Wash Pvt Ltd. All rights reserved.
+© 2024 Todoist Pvt Ltd. All rights reserved.

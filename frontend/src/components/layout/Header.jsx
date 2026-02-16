@@ -35,8 +35,8 @@ const Header = () => {
         <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-card/80 backdrop-blur-md">
             <div className="container flex h-16 items-center justify-between">
                 <Link to="/" className="flex items-center gap-2">
-                    <img src={logo} alt="Quick Smart Wash" className="h-10 w-10 rounded-full object-cover" />
-                    <span className="text-lg font-bold text-primary">Quick Smart Wash</span>
+                    <img src={logo} alt="Todoist" className="h-10 w-10 rounded-full object-cover" />
+                    <span className="text-lg font-bold text-primary">Todoist</span>
                 </Link>
 
                 <nav className="hidden md:flex items-center gap-1">

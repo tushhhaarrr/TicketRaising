@@ -27,14 +27,14 @@ const contactInfo = [
         icon: Mail,
         title: "Email Us",
         description: "Our team is here to help",
-        link: "support@quicksmartwash.com",
+        link: "support@todoist.com",
         variant: "Blue",
     },
     {
         icon: Phone,
         title: "Call Us",
         description: "Mon-Fri from 8am to 6pm",
-        link: "+919929922240",
+        link: "+9199999999",
         variant: "info",
     },
     {
