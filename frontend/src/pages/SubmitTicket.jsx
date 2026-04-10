@@ -15,7 +15,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { createTicket, classifyTicket } from "@/lib/api";
+import { createTicket } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 
 const categories = [
@@ -36,7 +36,6 @@ const SubmitTicket = () => {
     const { toast } = useToast();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isClassifying, setIsClassifying] = useState(false);
 
     // Form State
     const [title, setTitle] = useState("");
@@ -44,31 +43,6 @@ const SubmitTicket = () => {
     const [category, setCategory] = useState("");
     const [priority, setPriority] = useState("");
 
-    const handleDescriptionBlur = async () => {
-        if (!description || description.length < 5) return;
-
-        // Prevent multiple calls if already classifying
-        if (isClassifying) return;
-
-        setIsClassifying(true);
-        try {
-            const result = await classifyTicket(description);
-            if (result.suggested_category) {
-                setCategory(result.suggested_category);
-            }
-            if (result.suggested_priority) {
-                setPriority(result.suggested_priority);
-            }
-            toast({
-                title: "AI Suggestion Applied",
-                description: `Category set to ${result.suggested_category}, Priority to ${result.suggested_priority}`,
-            });
-        } catch (error) {
-            console.error("Classification failed", error);
-        } finally {
-            setIsClassifying(false);
-        }
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -127,12 +101,6 @@ const SubmitTicket = () => {
                                 <div className="space-y-2">
                                     <div className="flex justify-between">
                                         <Label htmlFor="description">Description</Label>
-                                        {isClassifying && (
-                                            <span className="text-xs text-primary flex items-center gap-1">
-                                                <Loader2 className="h-3 w-3 animate-spin" />
-                                                Analyzing...
-                                            </span>
-                                        )}
                                     </div>
                                     <Textarea
                                         id="description"
@@ -140,12 +108,8 @@ const SubmitTicket = () => {
                                         rows={6}
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
-                                        onBlur={handleDescriptionBlur}
                                         required
                                     />
-                                    <p className="text-xs text-muted-foreground">
-                                        AI will suggest Category and Priority after you finish typing.
-                                    </p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-6">
